@@ -11,7 +11,7 @@ const getAllCards = async (req, res) => {
     }
     res.status(200).send(cards);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка при обработке' });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -44,7 +44,7 @@ const deleteCard = async (req, res) => {
     }
     res.status(200).send(card);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка при обработке' });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -61,7 +61,7 @@ const likeCard = async (req, res) => {
     );
     res.status(201).send(card);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка при обработке' });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -78,7 +78,7 @@ const deleteLike = async (req, res) => {
     );
     res.status(200).send(card);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка при обработке' });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
 

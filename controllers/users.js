@@ -15,7 +15,7 @@ const getAllUsers = async (req, res) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
-    res.status(500).send({ message: 'Произошла ошибка при обработке' });
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
