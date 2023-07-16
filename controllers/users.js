@@ -11,7 +11,7 @@ const getAllUsers = async (req, res) => {
     }
     // eslint-disable-next-line no-console
     console.log(users);
-    res.status(400).send(users);
+    res.status(200).send(users);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
@@ -60,7 +60,7 @@ const updateUser = async (req, res) => {
   const { name, about } = req.body;
   const ownerId = req.user._id;
   try {
-    const user = await User.findByIdAndUpdate(ownerId, { name, about }, { new: true });
+    const user = await User.findByIdAndUpdate(ownerId, { name, about }, { new: true, runValidators: true });
     res.status(200).send(user);
   } catch (e) {
     // eslint-disable-next-line no-console

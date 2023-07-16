@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '64b267af8a62f1242be227dc',
+    _id: '64b3ac8c30371577b57ed95d',
   };
 
   next();
@@ -22,6 +22,9 @@ app.use((req, res, next) => {
 
 app.use('/', users);
 app.use('/', cards);
+app.use((req, res) => {
+  res.status(404).send({ message: 'Данный маршрут не существует' });
+});
 
 mongoose.connect('mongodb://127.0.0.1/mestodb', {
   useNewUrlParser: true,

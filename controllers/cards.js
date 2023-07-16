@@ -56,12 +56,17 @@ const likeCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndUpdate(
       cardId,
-      { $addToSet: { likes: ownerId } },
+      { $addToSet: { likes: ownerId, runValidators: true } },
       { new: true },
     );
-    res.status(201).send(card);
+
+    if (card) {
+      res.status(201).send(card);
+    } else {
+      res.status(404).send({ message: 'Карточка не найдена' });
+    }
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    res.status(400).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
@@ -76,9 +81,14 @@ const deleteLike = async (req, res) => {
       { $pull: { likes: ownerId } },
       { new: true },
     );
-    res.status(200).send(card);
+
+    if (card) {
+      res.status(200).send(card);
+    } else {
+      res.status(404).send({ message: 'Карточка не найдена' });
+    }
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    res.status(400).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
