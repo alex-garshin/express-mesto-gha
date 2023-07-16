@@ -6,7 +6,7 @@ const getAllCards = async (req, res) => {
   try {
     const cards = await Card.find({});
     if (cards.length === 0) {
-      res.status(404).send({ message: 'Ошибка. Карточки не найдены' });
+      res.status(404).send({ message: 'Карточки не найдены' });
       return;
     }
     res.status(200).send(cards);
