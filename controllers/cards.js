@@ -6,7 +6,7 @@ const getAllCards = async (req, res) => {
   try {
     const cards = await Card.find({});
     if (cards.length === 0) {
-      res.status(404).send({ message: 'Карточки не найдены' });
+      res.status(404);
       return;
     }
     res.status(200).send(cards);
@@ -44,7 +44,7 @@ const deleteCard = async (req, res) => {
     }
     res.status(200).send(card);
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    res.status(400).send({ message: 'На сервере произошла ошибка' });
   }
 };
 
