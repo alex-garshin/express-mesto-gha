@@ -1,94 +1,90 @@
 const Card = require('../models/card');
 
-const getAllCards = async (req, res) => {
-  // eslint-disable-next-line no-console
+const { ErrorHandler } = require('../errors/handleError');
+
+const statusCode = {
+  ok: 200,
+  created: 201,
+};
+
+const getAllCards = async (req, res, next) => {
   console.log('getAllCards');
   try {
-    const cards = await Card.find({});
-    if (cards.length === 0) {
-      res.status(404).send([]);
-      return;
-    }
-    res.status(200).send(cards);
+    const cards = await Card.find({}).populate('owner');
+    res.status(statusCode.ok).send(cards);
   } catch (err) {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    next(err);
   }
 };
 
-const createCard = async (req, res) => {
-  // eslint-disable-next-line no-console
+const createCard = async (req, res, next) => {
   console.log('createCard');
   const { name, link } = req.body;
   try {
     const ownerId = req.user._id;
     const card = await Card.create({ name, link, owner: ownerId });
-    // eslint-disable-next-line no-console
     console.log(card);
-    return res.status(201).send(card);
-  } catch (e) {
-    console.error(e);
-    const errors = Object.values(e.errors).map((err) => err.message);
-    return res.status(400).send({ message: errors.join(', ') });
-  }
-};
-
-const deleteCard = async (req, res) => {
-  // eslint-disable-next-line no-console
-  console.log('deleteCard');
-  const { cardId } = req.params;
-  try {
-    const card = await Card.findByIdAndRemove(cardId);
-    if (!card) {
-      res.status(404).send({ message: 'Карточка не найдена' });
-      return;
-    }
-    res.status(200).send(card);
+    res.status(statusCode.created).send(card);
   } catch (err) {
-    res.status(400).send({ message: 'На сервере произошла ошибка' });
+    next(err);
   }
 };
 
-const likeCard = async (req, res) => {
-  // eslint-disable-next-line no-console
+const deleteCard = async (req, res, next) => {
+  console.log('deleteCard');
+  try {
+    const { cardId } = req.params;
+    const userId = req.user._id;
+    const card = await Card
+      .findById(cardId)
+      .orFail(new ErrorHandler(404, 'Ошибка 404. Карточка не найдена'))
+      .populate('owner');
+    const ownerId = card.owner._id.toString();
+    if (ownerId !== userId) {
+      next(new ErrorHandler(403, 'Ошибка 403. Попытка удалить чужую карточку'));
+    }
+    await Card.findByIdAndRemove(cardId);
+    res.status(statusCode.ok).send(card);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const likeCard = async (req, res, next) => {
   console.log('likeCard');
   const { cardId } = req.params;
   const ownerId = req.user._id;
   try {
-    const card = await Card.findByIdAndUpdate(
-      cardId,
-      { $addToSet: { likes: ownerId, runValidators: true } },
-      { new: true },
-    );
-
-    if (card) {
-      res.status(201).send(card);
-    } else {
-      res.status(404).send({ message: 'Карточка не найдена' });
-    }
+    const card = await Card
+      .findByIdAndUpdate(
+        cardId,
+        { $addToSet: { likes: ownerId } },
+        { new: true },
+      )
+      .orFail(new ErrorHandler(404, 'Ошибка 404. Карточка не найдена'))
+      .populate(['owner', 'likes']);
+    res.status(statusCode.ok).send(card);
   } catch (err) {
-    res.status(400).send({ message: 'На сервере произошла ошибка' });
+    next(err);
   }
 };
 
-const deleteLike = async (req, res) => {
-  // eslint-disable-next-line no-console
+const deleteLike = async (req, res, next) => {
   console.log('deleteLike');
-  const { cardId } = req.params;
-  const ownerId = req.user._id;
   try {
-    const card = await Card.findByIdAndUpdate(
-      cardId,
-      { $pull: { likes: ownerId } },
-      { new: true },
-    );
-
-    if (card) {
-      res.status(200).send(card);
-    } else {
-      res.status(404).send({ message: 'Карточка не найдена' });
-    }
+    const { cardId } = req.params;
+    const ownerId = req.user._id;
+    const card = await Card
+      .findByIdAndUpdate(
+        cardId,
+        { $pull: { likes: ownerId } },
+        { new: true },
+      )
+      .orFail(new ErrorHandler(404, 'Ошибка 404. Карточка не найдена'))
+      .populate(['owner', 'likes']);
+    res.status(statusCode.ok).send(card);
   } catch (err) {
-    res.status(400).send({ message: 'На сервере произошла ошибка' });
+    next(err);
   }
 };
 
