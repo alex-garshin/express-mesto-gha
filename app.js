@@ -53,7 +53,9 @@ app.use('*', (req, res, next) => {
 
 app.use(errors());
 
+mongoose.set('strictQuery', true);
 mongoose
+
   .connect('mongodb://127.0.0.1/mestodb', {
     useNewUrlParser: true,
   })
