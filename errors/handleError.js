@@ -5,18 +5,12 @@ class CustomError extends Error {
   }
 }
 
-// const handleError = (err, res) => {
-//   const { statusCode, message } = err;
-//   res.status(statusCode).json({
-//     status: 'error',
-//     statusCode,
-//     message,
-//   });
-// };
-
 const handleError = (err, res) => {
   if (err instanceof CustomError) {
     return res.status(err.statusCode).send({ message: err.message });
+  }
+  if (err.code === 11000) {
+    return res.status(405).send({ message: 'Ошибка обновления данных в базе. Необходимо указывать уникальные данные' });
   }
   return res.status(500).send({ message: 'Ошибка сервера' });
 };

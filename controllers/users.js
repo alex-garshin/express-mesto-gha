@@ -18,11 +18,6 @@ const createUser = async (req, res, next) => {
     const {
       email, password, name, about, avatar,
     } = req.body;
-    const checkUserDuplication = await User.findOne({ email });
-    if (checkUserDuplication) {
-      next(new CustomError(409, `Ошибка 409. Пользователь ${email} уже существует`));
-      return;
-    }
     const passHash = await bcrypt.hash(password, 10);
     const user = await User.create({
       email,
