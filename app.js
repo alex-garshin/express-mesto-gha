@@ -8,7 +8,7 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { ErrorHandler, handleError } = require('./errors/handleError');
+const { CustomError, handleError } = require('./errors/handleError');
 
 require('dotenv').config();
 
@@ -48,7 +48,7 @@ app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
 
 app.use('*', (req, res, next) => {
-  next(new ErrorHandler(404, 'Ошибка 404. Введен некорректный адрес'));
+  next(new CustomError(404, 'Ошибка 404. Введен некорректный адрес'));
 });
 
 app.use(errors());

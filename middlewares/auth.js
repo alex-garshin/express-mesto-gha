@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { ErrorHandler } = require('../errors/handleError');
+const { CustomError } = require('../errors/handleError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -8,7 +8,8 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
   console.log({ authorization });
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new ErrorHandler(401, 'Ошибка 401. Необходима авторизация'));
+    next(new CustomError(401, 'Ошибка 401. Необходима авторизация'));
+    return;
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -17,7 +18,8 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key');
   } catch (err) {
-    next(err);
+    next(new CustomError(401, 'Ошибка 401. Невалидный токен'));
+    return;
   }
 
   req.user = payload;

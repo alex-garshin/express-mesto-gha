@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const { ErrorHandler } = require('../errors/handleError');
+const { CustomError } = require('../errors/handleError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 console.log(process.env.NODE_ENV);
@@ -18,12 +18,10 @@ const createUser = async (req, res, next) => {
     const {
       email, password, name, about, avatar,
     } = req.body;
-    if (!email || !password) {
-      next(new ErrorHandler(400, 'Ошибка 400. Неправильные почта или пароль'));
-    }
     const checkUserDuplication = await User.findOne({ email });
     if (checkUserDuplication) {
-      next(new ErrorHandler(409, `Ошибка 409. Пользователь ${email} уже существует`));
+      next(new CustomError(409, `Ошибка 409. Пользователь ${email} уже существует`));
+      return;
     }
     const passHash = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -41,10 +39,11 @@ const createUser = async (req, res, next) => {
       avatar: user.avatar,
     });
   } catch (err) {
-    if (err.name === 'CastError' || err.name === 'ValidationError') {
-      next(new ErrorHandler(400, 'Ошибка 400. Переданы некорректные данные'));
+    if (err.name === 'ValidationError') {
+      next(new CustomError(400, 'Ошибка 400. Переданы некорректные данные'));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
@@ -75,7 +74,8 @@ const getCurrentUser = async (req, res, next) => {
   try {
     const user = await User.findById(_id);
     if (!user) {
-      next(new ErrorHandler(404, 'Ошибка 404. Пользователь не найден'));
+      next(new CustomError(404, 'Ошибка 404. Пользователь не найден'));
+      return;
     }
     res.status(statusCode.ok).send(user);
   } catch (err) {
@@ -100,7 +100,8 @@ const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      next(new ErrorHandler(404, 'Ошибка 404. Пользователь не найден'));
+      next(new CustomError(404, 'Ошибка 404. Пользователь не найден'));
+      return;
     }
     res.status(statusCode.ok).send(user);
   } catch (err) {
@@ -122,7 +123,8 @@ const updateUser = async (req, res, next) => {
       },
     );
     if (!user) {
-      next(new ErrorHandler(404, 'Ошибка 404. Пользователь не найден'));
+      next(new CustomError(404, 'Ошибка 404. Пользователь не найден'));
+      return;
     }
     res.status(statusCode.ok).send(user);
   } catch (err) {
@@ -144,7 +146,8 @@ const updateAvatar = async (req, res, next) => {
       },
     );
     if (!user) {
-      next(new ErrorHandler(404, 'Ошибка 404. Пользователь не найден'));
+      next(new CustomError(404, 'Ошибка 404. Пользователь не найден'));
+      return;
     }
     res.status(statusCode.ok).send(user);
   } catch (err) {

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
-const { ErrorHandler } = require('../errors/handleError');
+const { CustomError } = require('../errors/handleError');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
     select: false,
   },
   name: {
@@ -47,12 +46,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new ErrorHandler(401, 'Передан неверный логин или пароль'));
+        return Promise.reject(new CustomError(401, 'Передан неверный логин или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new ErrorHandler(401, 'Передан неверный логин или пароль'));
+            return Promise.reject(new CustomError(401, 'Передан неверный логин или пароль'));
           }
           return user;
         });

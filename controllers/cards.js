@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 
-const { ErrorHandler } = require('../errors/handleError');
+const { CustomError } = require('../errors/handleError');
 
 const statusCode = {
   ok: 200,
@@ -37,11 +37,12 @@ const deleteCard = async (req, res, next) => {
     const userId = req.user._id;
     const card = await Card
       .findById(cardId)
-      .orFail(new ErrorHandler(404, 'Ошибка 404. Карточка не найдена'))
+      .orFail(new CustomError(404, 'Ошибка 404. Карточка не найдена'))
       .populate('owner');
     const ownerId = card.owner._id.toString();
     if (ownerId !== userId) {
-      next(new ErrorHandler(403, 'Ошибка 403. Попытка удалить чужую карточку'));
+      next(new CustomError(403, 'Ошибка 403. Попытка удалить чужую карточку'));
+      return;
     }
     await Card.findByIdAndRemove(cardId);
     res.status(statusCode.ok).send(card);
@@ -61,7 +62,7 @@ const likeCard = async (req, res, next) => {
         { $addToSet: { likes: ownerId } },
         { new: true },
       )
-      .orFail(new ErrorHandler(404, 'Ошибка 404. Карточка не найдена'))
+      .orFail(new CustomError(404, 'Ошибка 404. Карточка не найдена'))
       .populate(['owner', 'likes']);
     res.status(statusCode.ok).send(card);
   } catch (err) {
@@ -80,7 +81,7 @@ const deleteLike = async (req, res, next) => {
         { $pull: { likes: ownerId } },
         { new: true },
       )
-      .orFail(new ErrorHandler(404, 'Ошибка 404. Карточка не найдена'))
+      .orFail(new CustomError(404, 'Ошибка 404. Карточка не найдена'))
       .populate(['owner', 'likes']);
     res.status(statusCode.ok).send(card);
   } catch (err) {
