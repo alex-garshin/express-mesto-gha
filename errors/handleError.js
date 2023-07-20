@@ -6,13 +6,11 @@ class CustomError extends Error {
 }
 
 const handleError = (err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500 ? CustomError : message,
-    });
-  console.log(err.message);
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: CustomError });
+  }
   next();
 };
 
