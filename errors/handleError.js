@@ -5,13 +5,15 @@ class CustomError extends Error {
   }
 }
 
-const handleError = (err, res) => {
-  const { statusCode, message } = err;
-  res.status(statusCode).json({
-    status: 'error',
-    statusCode,
-    message,
-  });
+const handleError = (err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500 ? CustomError : message,
+    });
+  console.log(err.message);
+  next();
 };
 
 module.exports = {
