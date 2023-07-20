@@ -5,13 +5,11 @@ class CustomError extends Error {
   }
 }
 
-const handleError = (err, req, res, next) => {
-  if (err.statusCode) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else {
-    res.status(500).send({ message: CustomError });
+const handleError = (err, req, res) => {
+  if (err instanceof CustomError) {
+    return res.status(err.statusCode).send({ message: err.message });
   }
-  next();
+  return res.status(500).send({ message: 'Ошибка сервера' });
 };
 
 module.exports = {
